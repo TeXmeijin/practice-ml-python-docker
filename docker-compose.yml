@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  ml-python:
+    container_name: ml-python
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8887:8888"
+    volumes:
+      - ./src:/app:cached
