@@ -1,6 +1,7 @@
 # https://github.com/nielsborie/ml-docker/blob/master/Dockerfile.
 
 FROM jupyter/tensorflow-notebook:87c5183850b8
+SHELL ["/bin/bash", "-c"]
 
 LABEL maintainer="TeXmeijin"
 
@@ -8,8 +9,9 @@ USER root
 WORKDIR /app
 
 # --- Install python-tk htop python-boost
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python-tk software-properties-common htop libboost-all-dev && \
+RUN apt-get autoremove --purge && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends python-tk software-properties-common htop libboost-all-dev curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -25,24 +27,18 @@ RUN apt-get update && \
 # --- Update alternatives
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
 
-# Install OpenJDK-13
-RUN apt-get update && \
-    apt-get install -y openjdk-13-jdk && \
-    apt-get install -y ant && \
-    apt-get clean;
-
 # Fix certificate issues
 RUN apt-get update && \
-    apt-get install ca-certificates-java && \
     apt-get clean && \
     update-ca-certificates -f;
 
-# Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-13-openjdk-amd64/
-RUN export JAVA_HOME
+ENV POETRY_HOME="/opt/poetry" \
+    VENV_PATH="/opt/pysetup/.venv" \
+    PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
-RUN conda create -c conda-forge python=3.9 -n py39-demo && \
-    conda activate py39-demo
+# Install Poetry
+RUN pip install poetry
+RUN poetry init -n
 
 # --- Install h2o
 RUN $CONDA_DIR/bin/python -m pip install -f http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Py.html h2o
@@ -62,7 +58,7 @@ RUN conda install --quiet --yes \
 
 
 # --- Install vowpalwabbit, hyperopt, tpot, sklearn-deap, yellowbrick, spacy
-RUN $CONDA_DIR/bin/python -m pip install vowpalwabbit \
+RUN $CONDA_DIR/bin/python -m poetry add vowpalwabbit \
     hyperopt \
     deap \
     update_checker \
@@ -86,8 +82,8 @@ RUN $CONDA_DIR/bin/python -m pip install vowpalwabbit \
 # CREDITS : https://hub.docker.com/r/kaggle/python/dockerfile
 #
 ###########
-#RUN $CONDA_DIR/bin/python -m pip install --upgrade mpld3
-RUN $CONDA_DIR/bin/python -m pip install mplleaflet \
+#RUN $CONDA_DIR/bin/python -m poetry add --upgrade mpld3
+RUN $CONDA_DIR/bin/python -m poetry add mplleaflet \
     gpxpy \
     arrow \
     sexmachine \
@@ -117,7 +113,9 @@ RUN $CONDA_DIR/bin/python -m pip install mplleaflet \
 # pandas.read_hdf
 #
 ###########
-RUN $CONDA_DIR/bin/python -m pip install --upgrade tables
+RUN $CONDA_DIR/bin/python -m poetry add tables
 
 # clean up pip cache
 RUN rm -rf /root/.cache/pip/*
+
+RUN mkdir -p /home/jovyan/.local/share/jupyter && chown -R jovyan /home/jovyan/.local

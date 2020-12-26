@@ -15,13 +15,13 @@ with open(pkl_file, 'rb') as f:
     id_to_word = params['id_to_word']
 
 # most similar task
-querys = ['you', 'year', 'car', 'toyota']
+querys = ['java', 'year', 'car', 'toyota']
 for query in querys:
     most_similar(query, word_to_id, id_to_word, word_vecs, top=5)
 
 # analogy task
-print('-'*50)
-analogy('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs)
-analogy('take', 'took', 'go',  word_to_id, id_to_word, word_vecs)
-analogy('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs)
-analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs)
+# print('-'*50)
+# analogy('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs)
+# analogy('take', 'took', 'go',  word_to_id, id_to_word, word_vecs)
+# analogy('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs)
+# analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs)
